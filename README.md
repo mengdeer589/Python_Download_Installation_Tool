@@ -5,7 +5,7 @@ python工具，使用tkinter实现gui设计，用于在线下载第三方库whee
 # 离线安装
 本模块基于uv pip install命令实现安装指定的第三方库，指定的requirement.txt所包含的库，若指定的项目地址不存在虚拟环境，则使用uv v 命令创建。
 
-uv是一款python的第三方库，用于包管理及虚拟环境创建，项目地址[https://github.com/astral-sh/uv](uv)
+uv是一款python的第三方库，用于包管理及虚拟环境创建.
 
 tips：win7下，不支持uv 0.1.39以上版本。
 # 项目依赖
