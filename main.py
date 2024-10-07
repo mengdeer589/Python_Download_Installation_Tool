@@ -33,18 +33,18 @@ def execute_command(command: str, cwd: Path = None) -> tuple:
     try:
         output_lines = []
         with subprocess.Popen(
-                command,
-                cwd=cwd,
-                stdout=subprocess.PIPE,
-                stderr=subprocess.STDOUT,
-                text=True,
-                shell=True,
+            command,
+            cwd=cwd,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            text=True,
+            shell=True,
         ) as process:
             for line in process.stdout:
                 # 立即打印每一行输出，flush=True确保内容立即输出而不等待缓冲区满
                 print(line, end="", flush=True)
                 output_lines.append(line)  # 将每行添加到列表中
-            captured_output = ''.join(output_lines)
+            captured_output = "".join(output_lines)
         process.wait()
 
         if process.returncode != 0:
@@ -88,7 +88,11 @@ class DownLoad(WinGUI):
         self.tk_check_button_downdload.config(variable=self.v2)
         self.tk_input_path.config(state="readonly")
         self.tk_select_box_download.current(0)
-        self.wm_iconbitmap("down.ico")
+        if "runtime" in sys.exec_prefix:#区别打包环境
+            icon_file = Path.cwd().joinpath("runtime\\down.ico")
+        else:
+            icon_file = Path.cwd().joinpath("down.ico")
+        self.wm_iconbitmap(str(icon_file))
         self.get_python_path()
 
     def get_python_path(self):
@@ -183,12 +187,12 @@ class DownLoad(WinGUI):
     def construct_pip_command(self) -> str:
         """构建下载命令"""
         pip_command = [
-            f"{self.python_path}",
+            f'"{self.python_path}"',
             "-m",
             "pip",
             "download",
             "-d",
-            self.download_path,
+            f'"{self.download_path}"',
             self.target_package,
         ]
         if self.v2.get():
@@ -230,7 +234,7 @@ class DownLoad(WinGUI):
             total_count = len(tars)
             for idx, tar in enumerate(tars):
                 self.build_wheel(tar, self.download_path)
-                print(f"剩余{total_count-1-idx}个还未构建".center(80,"*"))
+                print(f"剩余{total_count - 1 - idx}个还未构建".center(80, "*"))
 
     @staticmethod
     def check_tar_gz(file_list: list[Path]) -> list[Path]:
@@ -297,6 +301,7 @@ class Install(WinGUI):
         """初始化界面"""
         self.tk_button_install_start.config(command=self.start)
         self.tk_button_install_infor.config(command=self.install_infor)
+        self.tk_button_install_uv.config(command=self.install_uv)
         self.tk_input_file_store.delete(0, "end")
         self.tk_input_file_store.insert(0, "E:\\导入\\第三方库导入")
         self.tk_input_target.delete(0, "end")
@@ -317,6 +322,35 @@ class Install(WinGUI):
             return False
         return True
 
+    def install_uv(self):
+        python_path = self.tk_input_python_path.get()
+        if not python_path:
+            messagebox.showerror(
+                title="指定python路径",
+                message="请将python解释器绝对路径复制粘贴到python解释器输入框中",
+            )
+            return
+        uv_file = Path.cwd().joinpath(
+            "runtime/uv-0.1.39-py3-none-win_amd64.whl"
+        )  # 该版本支持win7
+        command = [
+            f'"{python_path}"',
+            "-m",
+            "pip",
+            "install",
+            f'"{uv_file}"',
+            "--no-cache-dir",
+            "--no-index",
+        ]
+        command_str = " ".join(command)
+        print(command_str)
+        _, _, return_code = execute_command(command_str)
+        if return_code != 0:
+            print("uv工具安装失败\n")
+            self.tk_button_install_start.config(state=ACTIVE)
+            return
+        print("uv工具安装成功")
+
     def start(self) -> None:
         """开始安装第三方库"""
         if self.uv:
@@ -327,6 +361,7 @@ class Install(WinGUI):
             print(
                 "虚拟环境创建失败，请使用' pip install uv '或"
                 "' pip install uv --no-index -f path-to-uv-wheel ' 安装UV工具\n"
+                "或点击 安装UV工具 按钮进行安装"
             )
             return
 
@@ -344,7 +379,7 @@ class Install(WinGUI):
         venv_path = Path(target_path).joinpath(".venv\\Scripts\\activate.bat")
         cwd = Path(target_path)
         if not venv_path.exists():
-            command = ["uv", "venv"]
+            command = ["uv", "venv", f'--python="{self.tk_input_python_path}"']
             command_str = " ".join(command)
 
             _, _, return_code = execute_command(command_str, cwd=cwd)
@@ -357,7 +392,7 @@ class Install(WinGUI):
         de_venv_path = venv_path.parent.joinpath("deactivate.bat")
         commands = [
             [str(venv_path)],
-            ["uv", "pip", "install", "--offline", f"-f={file_store}", *target_file],
+            ["uv", "pip", "install", "--offline", f'-f="{file_store}"', *target_file],
             [str(de_venv_path)],
         ]
         for command in commands:
