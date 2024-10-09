@@ -88,7 +88,7 @@ class DownLoad(WinGUI):
         self.tk_check_button_downdload.config(variable=self.v2)
         self.tk_input_path.config(state="readonly")
         self.tk_select_box_download.current(0)
-        if "runtime" in sys.exec_prefix:#区别打包环境
+        if "runtime" in sys.exec_prefix:  # 区别打包环境
             icon_file = Path.cwd().joinpath("runtime\\down.ico")
         else:
             icon_file = Path.cwd().joinpath("down.ico")
@@ -379,7 +379,7 @@ class Install(WinGUI):
         venv_path = Path(target_path).joinpath(".venv\\Scripts\\activate.bat")
         cwd = Path(target_path)
         if not venv_path.exists():
-            command = ["uv", "venv", f'--python="{self.tk_input_python_path}"']
+            command = ["uv", "venv", f'--python="{self.tk_input_python_path.get()}"']
             command_str = " ".join(command)
 
             _, _, return_code = execute_command(command_str, cwd=cwd)
