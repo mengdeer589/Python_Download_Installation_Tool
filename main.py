@@ -459,3 +459,5 @@ class MainWindow(DownLoad, Install):
 if __name__ == "__main__":
     window = MainWindow()
     window.mainloop()
+
+#nuitka --windows-icon-from-ico=down.ico main.py
