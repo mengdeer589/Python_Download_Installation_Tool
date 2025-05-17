@@ -5,9 +5,8 @@ QQ交流群:905019785
 在线反馈:https://support.qq.com/product/618914
 """
 
-import random
-from tkinter import *
-from tkinter.ttk import *
+from tkinter import * # type: ignore[assignment]
+from tkinter.ttk import * # type: ignore[assignment]
 
 
 class WinGUI(Tk):
@@ -27,7 +26,7 @@ class WinGUI(Tk):
         self.tk_select_box_download = self.__tk_select_box_download(
             self.tk_label_frame_lw1wssni
         )
-        self.tk_check_button_downdload = self.__tk_check_button_downdload(
+        self.tk_check_button_download = self.__tk_check_button_downdload(
             self.tk_label_frame_lw1wssni
         )
         self.tk_label_frame_lw1wx3j1 = self.__tk_label_frame_lw1wx3j1(

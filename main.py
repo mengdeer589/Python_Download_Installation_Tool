@@ -28,7 +28,7 @@ class ReStd(Queue):
         return
 
 
-def execute_command(command: str, cwd: Path = None) -> tuple:
+def execute_command(command: str, cwd: Path|None = None) -> tuple:
     """使用subprocess执行下载命令，并捕获输出"""
     try:
         output_lines = []
@@ -39,12 +39,16 @@ def execute_command(command: str, cwd: Path = None) -> tuple:
             stderr=subprocess.STDOUT,
             text=True,
             shell=True,
+            encoding="utf-8",
+            universal_newlines=True,
         ) as process:
-            for line in process.stdout:
-                # 立即打印每一行输出，flush=True确保内容立即输出而不等待缓冲区满
-                print(line, end="", flush=True)
-                output_lines.append(line)  # 将每行添加到列表中
-            captured_output = "".join(output_lines)
+            if process.stdout is not None:
+                for line in iter(process.stdout.readline, ''):
+                    print(line, end="", flush=True)
+                    output_lines.append(line)
+                captured_output = "".join(output_lines)
+            else:
+                captured_output = ""
         process.wait()
 
         if process.returncode != 0:
@@ -65,7 +69,7 @@ class DownLoad(WinGUI):
 
     def __init__(self):
         super().__init__()
-        self.v2 = BooleanVar()
+        self.v2 = BooleanVar(value=True)
         self.python_path = None
         self.download_path = ""
         self.target_package = None
@@ -85,7 +89,7 @@ class DownLoad(WinGUI):
 
     def configure_gui(self):
         """初始化界面参数"""
-        self.tk_check_button_downdload.config(variable=self.v2)
+        self.tk_check_button_download.config(variable=self.v2)
         self.tk_input_path.config(state="readonly")
         self.tk_select_box_download.current(0)
         if "runtime" in sys.exec_prefix:  # 区别打包环境
@@ -272,7 +276,9 @@ class DownLoad(WinGUI):
     def get_wheel_name(self, message: str, download_path: str, file_path: Path) -> None:
         """获取编译生成的wheel文件名"""
         pattern = r"filename=(.+\.whl)"
-        match = re.search(pattern, message)
+        match:re.Match|None = re.search(pattern, message)
+        if match is None:
+            return
         try:
             filename = match.group(1)
             file_path = file_path.joinpath(filename)

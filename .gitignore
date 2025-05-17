@@ -5,3 +5,5 @@
 /runtime
 main.exe
 main.cmd
+pyproject.toml
+.python-version
