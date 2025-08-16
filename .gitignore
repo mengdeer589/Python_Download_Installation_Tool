@@ -7,3 +7,5 @@ main.exe
 main.cmd
 pyproject.toml
 .python-version
+/main.dist
+nuitka-crash-report.xml
